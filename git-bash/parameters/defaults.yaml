@@ -1,0 +1,18 @@
+# -*- coding: utf-8 -*-
+# vim: ft=yaml
+#
+# Set default values.
+---
+values:
+  pkg:
+    name: git-bash
+  rootgroup: root
+  config: '/etc/git-bash'
+  service:
+    name: git-bash
+  subcomponent:
+    config: '/etc/git-bash-subcomponent-formula.conf'
+  # Just here for testing
+  added_in_defaults: defaults_value
+  winner: defaults
+...
