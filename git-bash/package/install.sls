@@ -4,27 +4,55 @@
 {#- Get the `tplroot` from `tpldir` #}
 {%- set tplroot = tpldir.split('/')[0] %}
 {%- from tplroot ~ "/map.jinja" import mapdata as git_bash with context %}
-
+{%- set config = git_bash.get('config', {}) %}
 {%- set pkg = git_bash.get('pkg', {}) %}
-{%- set prefix_path = pkg.get('prefix', 'C:\\Program Files\\Git') %}
-{%- set version = pkg.get('version', '2.54.0') %}
+{%- set install_prefix = config.get(
+      'install_root', 'C:\\Program Files\\Git'
+    ) %}
+{%- set source_url = pkg.get('download_uri') %}
+{%- set skip_verify = false if pkg.get('download_sig') else true %}
 
-{%- set base = "https://github.com/git-for-windows/git/releases/download" %}
-{%- set release_dir = "v" ~ version ~ ".windows.1" %}
-{%- set file_name = "Git-" ~ version ~ "-64-bit.tar.bz2" %}
-{%- set source_url = [base, release_dir, file_name] | join("/") %}
+{%- if not source_url %}
+  {%- set api_path = "git-for-windows/git/releases/latest" %}
+  {%- set api_url = [
+        "https://api.github.com/repos", api_path
+      ] | join("/") %}
+  {%- set headers = {"User-Agent": "SaltStack"} %}
+  {%- set res = salt["http.query"](api_url, headers=headers) %}
+  {%- if res and res.get("body") %}
+    {%- set release_data = res["body"] | load_json %}
+    {%- for asset in release_data.get("assets", []) %}
+      {%- set asset_name = asset.get("name", "") %}
+      {%- if asset_name.endswith("-64-bit.tar.bz2") %}
+        {%- set source_url = asset.get("browser_download_url") %}
+      {%- endif %}
+    {%- endfor %}
+  {%- endif %}
+{%- endif %}
 
+{%- if source_url and source_url.endswith('tar.bz2') %}
 Configure Installation Directory:
   file.directory:
     - makedirs: true
-    - name: {{ prefix_path | json }}
+    - name: {{ install_prefix | json }}
 
 Extract Git Bash Archive:
   archive.extracted:
     - archive_format: tar
     - enforce_toplevel: false
-    - name: {{ prefix_path | json }}
+    - force: true
+    - name: {{ install_prefix | json }}
     - overwrite: true
     - require:
       - file: Configure Installation Directory
-    - source: {{ source_url }}
+    - skip_verify: {{ skip_verify }}
+    - source: {{ source_url | json }}
+{%- else %}
+Unsupported Install-type:
+  test.show_notification:
+    - text: |
+        -----------------------------------
+        Support for other installation-
+        types not yet available
+        -----------------------------------
+{%- endif %}
