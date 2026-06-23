@@ -9,10 +9,13 @@
 {%- set install_prefix = config.get(
       'install_root', 'C:\\Program Files\\Git'
     ) %}
-{%- set source_url = pkg.get('download_uri') %}
 {%- set skip_verify = false if pkg.get('download_sig') else true %}
 
-{%- if not source_url %}
+{%- set url_ns = {
+      'source_url': pkg.get('download_uri', '')
+    } %}
+
+{%- if not url_ns.source_url %}
   {%- set api_path = "git-for-windows/git/releases/latest" %}
   {%- set api_url = [
         "https://api.github.com/repos", api_path
@@ -24,13 +27,15 @@
     {%- for asset in release_data.get("assets", []) %}
       {%- set asset_name = asset.get("name", "") %}
       {%- if asset_name.endswith("-64-bit.tar.bz2") %}
-        {%- set source_url = asset.get("browser_download_url") %}
+        {%- do url_ns.update({
+              'source_url': asset.get('browser_download_url')
+            }) %}
       {%- endif %}
     {%- endfor %}
   {%- endif %}
 {%- endif %}
 
-{%- if source_url and source_url.endswith('tar.bz2') %}
+{%- if url_ns.source_url and url_ns.source_url.endswith('tar.bz2') %}
 Configure Installation Directory:
   file.directory:
     - makedirs: true
@@ -46,9 +51,9 @@ Extract Git Bash Archive:
     - require:
       - file: Configure Installation Directory
     - skip_verify: {{ skip_verify }}
-    - source: {{ source_url | json }}
+    - source: {{ url_ns.source_url | json }}
 {%- else %}
-Unsupported Install-type:
+Unsupported Install Type:
   test.show_notification:
     - text: |
         -----------------------------------
