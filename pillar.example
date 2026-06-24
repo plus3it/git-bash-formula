@@ -1,0 +1,32 @@
+# -*- coding: utf-8 -*-
+# vim: ft=yaml
+---
+git-bash:
+  lookup:
+    config:
+      # Multi-line banner string rendered inside corporate.sh profile
+      banner_text: |
+        This is a proprietary computer system belonging to the Corporation.
+        Access is restricted strictly to authorized corporate personnel only.
+        
+        By continuing to use this system, you acknowledge and consent that
+        all activities may be monitored, recorded, and audited by Corporate
+        Security. Unauthorized or improper use of this system may result in
+        disciplinary action, termination, and civil or criminal penalties.
+      # Custom site-specific lines or commands appended into corporate.sh
+      extra_profile_lines:
+        - 'export AWS_REGION="us-west-1"'
+        - 'export HTTP_PROXY="http://proxy.mydomain.tld:8080"'
+        - 'alias ll="ls -la --color=auto"'
+      # Explicit system path root where Git Bash components are provisioned
+      install_root: 'C:\Program Files\Git'
+    pkg:
+      # Target archive suffix extension type used to evaluate installation splits
+      # Set to 'tar.bz2' for portable archives or 'exe' for standard installers
+      archive_type: 'tar.bz2'
+      # Optional explicitly supplied absolute verification validation checksum
+      download_sig: 'sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+      # Fallback asset source URL path (bypasses dynamic GitHub API scraping)
+      download_uri: 'https://internal-mirror.local/git/Git-2.54.0-64-bit.tar.bz2'
+      # Definitive package identifier tracking key
+      name: 'git-bash'
