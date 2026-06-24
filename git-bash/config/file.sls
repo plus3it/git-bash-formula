@@ -26,7 +26,7 @@ Configure Corporate Shell Profile:
     - name: {{ profile_path | json }}
     - require:
       - sls: {{ sls_package_install }}
-    - source: {{ files_switch(['corporate.sh'],
+    - source: {{ files_switch(['corporate.sh.tpl'],
                               lookup='Configure Corporate Shell Profile'
                  )
               }}
