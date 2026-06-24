@@ -33,14 +33,13 @@ Configure Corporate Shell Profile:
     - template: jinja
 
 Configure System Gitconfig File:
-  file.managed:
-    - context:
-        git_bash: {{ git_bash | json }}
+  ini.options_present:
     - name: {{ gitconfig_path | json }}
     - require:
       - sls: {{ sls_package_install }}
-    - source: {{ files_switch(['gitconfig'],
-                              lookup='Configure System Gitconfig File'
-                 )
-              }}
-    - template: jinja
+    - sections:
+        core:
+          autocrlf: true
+          longpaths: true
+        http:
+          sslBackend: schannel
