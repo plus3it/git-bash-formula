@@ -48,6 +48,7 @@ Extract Git Bash Archive:
     - archive_format: tar
     - enforce_toplevel: false
     - force: true
+    - if_missing: {{ [install_prefix, 'git-bash.exe'] | join('\\') | json }}
     - name: {{ install_prefix | json }}
     - overwrite: true
     - require:
