@@ -15,6 +15,22 @@ include:
       'install_root', 'C:\\Program Files\\Git'
     ) %}
 {%- set gitconfig_path = [install_prefix, 'etc', 'gitconfig'] | join('\\') %}
+{%- set profile_path = [
+      install_prefix, 'etc', 'profile.d', 'corporate.sh'
+    ] | join('\\') %}
+
+Configure Corporate Shell Profile:
+  file.managed:
+    - context:
+        git_bash: {{ git_bash | json }}
+    - name: {{ profile_path | json }}
+    - require:
+      - sls: {{ sls_package_install }}
+    - source: {{ files_switch(['corporate.sh'],
+                              lookup='Configure Corporate Shell Profile'
+                 )
+              }}
+    - template: jinja
 
 Configure System Gitconfig File:
   file.managed:

@@ -10,5 +10,8 @@ values:
     download_sig: ''
     archive_type: 'exe'
   config:
+    banner_text: |
+      Unauthorized access to this environment is strictly prohibited.
+      All activities executed inside Git BASH are subject to audit logging.
     install_root: 'C:\Program Files\Git'
 ...
