@@ -19,6 +19,19 @@ include:
       install_prefix, 'etc', 'profile.d', 'corporate.sh'
     ] | join('\\') %}
 
+{%- set bash_target = [install_prefix, 'bin', 'bash.exe'] | join('\\') %}
+{%- set icon_target = [
+      install_prefix, 'mingw64', 'share', 'git', 'git-for-windows.ico'
+    ] | join('\\') %}
+
+{%- set desktop_lnk = [
+      'C:\\Users\\Public\\Desktop', 'Git Bash.lnk'
+    ] | join('\\') %}
+{%- set start_lnk = [
+      'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs',
+      'Git Bash.lnk'
+    ] | join('\\') %}
+
 Configure Corporate Shell Profile:
   file.managed:
     - context:
@@ -26,7 +39,7 @@ Configure Corporate Shell Profile:
     - name: {{ profile_path | json }}
     - require:
       - sls: {{ sls_package_install }}
-    - source: {{ files_switch(['corporate.sh.tpl'],
+    - source: {{ files_switch(['corporate.sh'],
                               lookup='Configure Corporate Shell Profile'
                   )
               }}
@@ -43,3 +56,23 @@ Configure System Gitconfig File:
           longpaths: true
         http:
           sslBackend: schannel
+
+Create Git Bash Desktop Shortcut:
+  file.shortcut:
+    - arguments: '--login -i'
+    - iconlocation: {{ icon_target | json }}
+    - name: {{ desktop_lnk | json }}
+    - require:
+      - sls: {{ sls_package_install }}
+    - target: {{ bash_target | json }}
+    - working_dir: {{ install_prefix | json }}
+
+Create Git Bash Start Menu Shortcut:
+  file.shortcut:
+    - arguments: '--login -i'
+    - iconlocation: {{ icon_target | json }}
+    - name: {{ start_lnk | json }}
+    - require:
+      - sls: {{ sls_package_install }}
+    - target: {{ bash_target | json }}
+    - working_dir: {{ install_prefix | json }}
