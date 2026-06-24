@@ -13,5 +13,6 @@ values:
     banner_text: |
       Unauthorized access to this environment is strictly prohibited.
       All activities executed inside Git BASH are subject to audit logging.
+    extra_profile_lines: []
     install_root: 'C:\Program Files\Git'
 ...

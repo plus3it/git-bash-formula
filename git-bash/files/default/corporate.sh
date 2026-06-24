@@ -17,3 +17,12 @@ echo {{ line | json }}
 {%- endfor %}
 echo "======================================================================="
 {%- endif %}
+
+{%- set extra_lines = config.get('extra_profile_lines') or [] %}
+{%- if extra_lines %}
+
+# Site-specific environment additions
+{%- for line in extra_lines %}
+{{ line }}
+{%- endfor %}
+{%- endif %}
