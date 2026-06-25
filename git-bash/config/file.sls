@@ -39,7 +39,7 @@ Configure Corporate Shell Profile:
     - name: {{ profile_path | json }}
     - require:
       - sls: {{ sls_package_install }}
-    - source: {{ files_switch(['corporate.sh'],
+    - source: {{ files_switch(['corporate.sh.tmpl'],
                               lookup='Configure Corporate Shell Profile'
                   )
               }}
@@ -58,9 +58,10 @@ Configure System Gitconfig File:
           sslBackend: schannel
 
 Create Git Bash Desktop Shortcut:
-  file.shortcut:
+  shortcut.present:
     - arguments: '--login -i'
-    - iconlocation: {{ icon_target | json }}
+    - icon_index: 0
+    - icon_location: {{ icon_target | json }}
     - name: {{ desktop_lnk | json }}
     - require:
       - sls: {{ sls_package_install }}
@@ -68,9 +69,10 @@ Create Git Bash Desktop Shortcut:
     - working_dir: {{ install_prefix | json }}
 
 Create Git Bash Start Menu Shortcut:
-  file.shortcut:
+  shortcut.present:
     - arguments: '--login -i'
-    - iconlocation: {{ icon_target | json }}
+    - icon_index: 0
+    - icon_location: {{ icon_target | json }}
     - name: {{ start_lnk | json }}
     - require:
       - sls: {{ sls_package_install }}
