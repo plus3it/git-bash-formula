@@ -1,0 +1,40 @@
+# -*- coding: utf-8 -*-
+# vim: ft=yaml
+---
+driver:
+  name: "exec"
+
+provisioner:
+  formula: "git-bash"
+  log_level: "debug"
+  name: "salt_solo"
+  pillars_from_directories:
+    - "tests/pillar/git-bash"
+  require_chef: false
+  root_path: "C:\\salt_kitchen"
+  salt_copy_filter:
+    - ".kitchen"
+    - ".git"
+  salt_install: "none"
+
+transport:
+  max_wait_until_ready: 60
+
+verifier:
+  name: "inspec"
+  reporter:
+    - "cli"
+  root_path: "C:\\salt_kitchen"
+  sudo: true
+
+platforms:
+  - name: "windows-2022"
+
+suites:
+  - name: "default"
+    provisioner:
+      state_top:
+        base:
+          "*":
+            - "git-bash._mapdata"
+            - "git-bash"

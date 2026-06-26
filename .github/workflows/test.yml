@@ -26,3 +26,40 @@ jobs:
       salt-os-version: ${{ matrix.os_version }}
       salt-state: ${{ matrix.salt_state }}
       salt-pillar-root: ${{ matrix.salt_pillar_root }}
+
+  verify-shortcut-integration:
+    name: "Execute Salt Kitchen Integration Verification"
+    runs-on: "windows-2022"
+    steps:
+      - name: "Check Out Source Repository"
+        uses: "actions/checkout@v4"
+
+      - name: "Set Up Ruby Execution Environment"
+        uses: "ruby/setup-ruby@v1"
+        with:
+          ruby-version: "3.2"
+
+      - name: "Regenerate Dependency Lockfile with Full Index"
+        run: |
+          Remove-Item Gemfile.lock -Force -ErrorAction SilentlyContinue
+          bundle install --full-index
+        shell: "powershell"
+
+      - name: "Install Salt Minion Natively"
+        run: |
+          choco install saltminion -y
+          echo "C:\Program Files\Salt Project\Salt" >> $env:GITHUB_PATH
+        shell: "powershell"
+
+      - name: "Execute Converge and Verify Integration Tests"
+        run: |
+          bundle exec kitchen converge default
+          bundle exec kitchen verify default
+        shell: "powershell"
+
+      - if: "always()"
+        name: "Upload Test Kitchen Execution Logs"
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: "kitchen-logs"
+          path: ".kitchen/logs/"
