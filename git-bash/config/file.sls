@@ -14,15 +14,16 @@ include:
 {%- set install_prefix = config.get(
       'install_root', 'C:\\Program Files\\Git'
     ) %}
-{%- set gitconfig_path = [install_prefix, 'etc', 'gitconfig'] | join('\\') %}
+{%- set gitconfig_path = [install_prefix, 'etc', 'gitconfig'] |
+      join('\\') %}
 {%- set profile_path = [
       install_prefix, 'etc', 'profile.d', 'corporate.sh'
     ] | join('\\') %}
 
-{%- set bash_target = [install_prefix, 'bin', 'bash.exe'] | join('\\') %}
 {%- set icon_target = [
       install_prefix, 'mingw64', 'share', 'git', 'git-for-windows.ico'
     ] | join('\\') %}
+{%- set shortcut_target = [install_prefix, 'git-bash.exe'] | join('\\') %}
 
 {%- set desktop_lnk = [
       'C:\\Users\\Public\\Desktop', 'Git Bash.lnk'
@@ -59,22 +60,20 @@ Configure System Gitconfig File:
 
 Create Git Bash Desktop Shortcut:
   shortcut.present:
-    - arguments: '--login -i'
     - icon_index: 0
     - icon_location: {{ icon_target | json }}
     - name: {{ desktop_lnk | json }}
     - require:
       - sls: {{ sls_package_install }}
-    - target: {{ bash_target | json }}
+    - target: {{ shortcut_target | json }}
     - working_dir: {{ install_prefix | json }}
 
 Create Git Bash Start Menu Shortcut:
   shortcut.present:
-    - arguments: '--login -i'
     - icon_index: 0
     - icon_location: {{ icon_target | json }}
     - name: {{ start_lnk | json }}
     - require:
       - sls: {{ sls_package_install }}
-    - target: {{ bash_target | json }}
+    - target: {{ shortcut_target | json }}
     - working_dir: {{ install_prefix | json }}
