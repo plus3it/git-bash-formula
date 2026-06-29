@@ -15,7 +15,6 @@ jobs:
     strategy:
       matrix:
         os_version:
-          - windows-2019
           - windows-2022
           - windows-2025
         salt_state:
