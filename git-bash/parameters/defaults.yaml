@@ -5,10 +5,11 @@
 ---
 values:
   pkg:
-    name: git-bash
-    download_uri: ''
-    download_sig: ''
     archive_type: 'exe'
+    download_sig: ''
+    download_uri: ''
+    fallback_uri: 'https://github.com/git-for-windows/git/releases/download/v2.54.0.windows.1/Git-2.54.0-64-bit.exe'
+    name: git-bash
   config:
     banner_text: |
       Unauthorized access to this environment is strictly prohibited.
