@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 # vim: ft=sls
 
-# Get the tplroot from tpldir
+{#- Get the `tplroot` from `tpldir` #}
 {%- set tplroot = tpldir.split('/')[0] %}
 {%- from tplroot ~ "/map.jinja" import mapdata as git_bash with context %}
-
 {%- set config = git_bash.get('config') or {} %}
 {%- set pkg = git_bash.get('pkg') or {} %}
+
 {%- set install_prefix = config.get(
       'install_root', 'C:\\Program Files\\Git'
     ) %}
 {%- set skip_verify = false if pkg.get('download_sig') else true %}
 {%- set archive_ext = pkg.get('archive_type') or 'exe' %}
 {%- set match_suffix = "-64-bit." ~ archive_ext %}
-{%- set url_ns = {'source_url': pkg.get('download_uri', '')} %}
+{%- set url_ns = {
+      'source_url': pkg.get('download_uri', '')
+    } %}
 
 {%- if not url_ns.source_url %}
   {%- set api_path = "git-for-windows/git/releases/latest" %}
@@ -35,14 +37,7 @@
   {%- endif %}
 {%- endif %}
 
-# Use `fallback_uri` if GitHub rate-limits us
-{%- if not url_ns.source_url %}
-  {%- do url_ns.update({'source_url': pkg.get('fallback_uri', '')}) %}
-{%- endif %}
-
 {%- if url_ns.source_url and url_ns.source_url.endswith('tar.bz2') %}
-{%- set check_exe = [install_prefix, 'git-bash.exe'] | join('\\') %}
-
 Configure Installation Directory:
   file.directory:
     - makedirs: true
@@ -53,35 +48,39 @@ Extract Git Bash Archive:
     - archive_format: tar
     - enforce_toplevel: false
     - force: true
-    - if_missing: {{ check_exe | json }}
     - name: {{ install_prefix | json }}
     - overwrite: true
     - require:
       - file: Configure Installation Directory
     - skip_verify: {{ skip_verify }}
     - source: {{ url_ns.source_url | json }}
-
 {%- elif url_ns.source_url and url_ns.source_url.endswith('exe') %}
-  {%- set temp_dir = salt['environ.get']('TEMP', 'C:\\Windows\\Temp') %}
+  {%- set temp_dir = salt['environ.get'](
+        'TEMP', 'C:\\Windows\\Temp'
+      ) %}
   {%- set installer_path = [
         temp_dir, "git-bash-installer.exe"
       ] | join("\\") %}
-  {%- set check_path = [install_prefix, "git-bash.exe"] | join("\\") %}
-
-  # Force powershell to wait synchronously for GUI installers
-  {%- set cmd_exec = [
-        "& '" ~ installer_path ~ "'",
+  {%- set cmd_args = [
         "/VERYSILENT",
         "/NORESTART",
         "/CLOSEAPPS",
         "/SUPPRESSMSGBOXES",
-        "/DIR=" ~ '"' ~ install_prefix ~ '"',
-        "| Out-Null;",
-        "if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+        ['/DIR=', '"', install_prefix, '"'] | join
       ] | join(" ") %}
-
+  {%- set cmd_exec = [
+        "Start-Process",
+        "-FilePath '" ~ installer_path ~ "'",
+        "-ArgumentList '" ~ cmd_args ~ "'",
+        "-NoNewWindow",
+        "-Wait"
+      ] | join(" ") %}
+  {%- set check_path = [
+        install_prefix, "git-bash.exe"
+      ] | join("\\") %}
   {%- set unless_cmd = [
-        "if (Test-Path '" ~ check_path ~ "') { exit 0 } else { exit 1 }"
+        "if (Test-Path",
+        "'" ~ check_path ~ "') { exit 0 } else { exit 1 }"
       ] | join(" ") %}
 
 Download Git Bash Installer:
@@ -97,9 +96,7 @@ Run Git Bash Installer:
       - file: Download Git Bash Installer
     - shell: powershell
     - unless: {{ unless_cmd | json }}
-
 {%- else %}
-
 Unsupported Install Type:
   test.show_notification:
     - text: |
@@ -107,5 +104,4 @@ Unsupported Install Type:
         Support for other installation-
         types not yet available
         -----------------------------------
-
 {%- endif %}
